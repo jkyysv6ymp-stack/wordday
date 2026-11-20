@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#635bdb">
+<title>WordDay</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;background:linear-gradient(135deg,#5148d8,#9b65d8,#e58bb8);background-attachment:fixed;min-height:100vh}
+body.photo{background-size:cover;background-position:center;background-attachment:fixed}
+.overlay{min-height:100vh;background:rgba(15,15,35,.22);padding:20px 15px 40px}
+.app{max-width:650px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 3px}
+.logo{font-size:27px;font-weight:800;letter-spacing:-1px}
+.small{font-size:12px;opacity:.8}
+.card{background:rgba(255,255,255,.16);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:19px;margin:14px 0;box-shadow:0 8px 28px #20205020}
+h2{font-size:21px;margin:5px 0 15px}
+h3{font-size:16px;margin:8px 0}
+p{line-height:1.5}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:15px 0}
+nav button{padding:12px 3px;font-size:12px}
+button{border:0;border-radius:13px;padding:12px 15px;background:#fff;color:#4940a8;font-weight:700;font-size:14px;cursor:pointer}
+button:active{transform:scale(.97)}
+input,select{width:100%;padding:13px;margin:6px 0 12px;border:1px solid #ffffff80;border-radius:12px;background:#ffffffed;color:#292447;font-size:15px}
+label{font-size:13px;font-weight:600}
+.primary{background:#ffe18b;color:#44368d}
+.secondary{background:#ffffff30;color:white;border:1px solid #ffffff70}
+.word{background:#ffffff20;padding:13px;border-radius:14px;margin:9px 0;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.word strong{font-size:17px}
+.word small{display:block;opacity:.85;margin-top:4px}
+.word button{padding:9px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{text-align:center;background:#ffffff20;padding:13px 5px;border-radius:14px}
+.stat b{font-size:24px;display:block}
+.hidden{display:none!important}
+.palettes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.palette{height:65px;border-radius:13px;border:2px solid #ffffff80}
+footer{text-align:center;font-size:11px;opacity:.75;margin:25px}
+</style>
+</head>
+<body>
+<div class="overlay">
+<div class="app">
+<header>
+<div>
+<div class="logo">✦ WordDay</div>
+<div class="small">Ҳар рӯз як қадам ба пеш</div>
+</div>
+<div>🌍</div>
+</header>
+
+<div class="card">
+<div class="small">ХУШ ОМАДЕД!</div>
+<h2>Забон омӯзед, ҳар рӯз рушд кунед.</h2>
+<p>Калимаҳои навро омӯзед ва пешрафти худро бинед.</p>
+<div class="stats">
+<div class="stat"><b id="total">0</b><span class="small">Калимаҳо</span></div>
+<div class="stat"><b id="learned">0</b><span class="small">Омӯхта</span></div>
+<div class="stat"><b id="quizzes">0</b><span class="small">Санҷишҳо</span></div>
+</div>
+</div>
+
+<nav>
+<button onclick="show('home')">🏠 Асосӣ</button>
+<button onclick="show('dictionary')">📚 Луғат</button>
+<button onclick="show('quiz')">🧠 Санҷиш</button>
+<button onclick="show('settings')">⚙️ Танзимот</button>
+</nav>
+
+<section id="home" class="page">
+<div class="card">
+<h2>Имрӯз чӣ меомӯзем?</h2>
+<p id="languageInfo">Забони омӯзиш: English</p>
+<button class="primary" onclick="show('dictionary')">Ба луғат гузаштан →</button>
+</div>
+<div class="card">
+<h2>Калимаҳои ман</h2>
+<div id="recent"></div>
+</div>
+</section>
+
+<section id="dictionary" class="page hidden">
+<div class="card">
+<h2>📚 Луғати шахсӣ</h2>
+<label>Калима</label>
+<input id="newWord" placeholder="Масалан: Beautiful">
+<label>Тарҷума</label>
+<input id="newMeaning" placeholder="Масалан: Зебо">
+<label>Талаффуз ё шарҳ (ихтиёрӣ)</label>
+<input id="newNote" placeholder="Шарҳи калима">
+<button class="primary" onclick="addWord()">+ Илова кардани калима</button>
+</div>
+<div class="card">
+<h2>Ҳамаи калимаҳо</h2>
+<div id="wordList"></div>
+</div>
+</section>
+
+<section id="quiz" class="page hidden">
+<div class="card">
+<h2>🧠 Санҷиши дониш</h2>
+<p>Тарҷумаи калимаи зеринро интихоб кунед:</p>
+<h2 id="question">Барои оғоз тугмаро пахш кунед</h2>
+<div id="answers"></div>
+<p id="feedback"></p>
+<button class="primary" onclick="startQuiz()">Саволи нав</button>
+</div>
+</section>
+
+<section id="settings" class="page hidden">
+<div class="card">
+<h2>🌐 Забонҳои омӯзиш</h2>
+<label>Ман кадом забонро меомӯзам?</label>
+<select id="learnLanguage" onchange="saveSettings()">
+<option>English</option><option>Тоҷикӣ</option>
+<option>Русский</option><option>العربية</option>
+<option>Deutsch</option><option>Français</option>
+<option>Español</option><option>中文</option>
+<option>日本語</option><option>Türkçe</option>
+<option>Italiano</option><option>한국어</option>
+</select>
+<label>Бо кадом забон шарҳ гирам?</label>
+<select id="baseLanguage" onchange="saveSettings()">
+<option>Тоҷикӣ</option><option>Русский</option>
+<option>English</option><option>العربية</option>
+</select>
+</div>
+
+<div class="card">
+<h2>🎨 Ороиши барнома</h2>
+<p>Фони дӯстдоштаи худро интихоб кунед.</p>
+<div class="palettes">
+<button class="palette" style="background:linear-gradient(135deg,#5148d8,#e58bb8)" onclick="setBg(0)"></button>
+<button class="palette" style="background:linear-gradient(135deg,#087e8b,#55c6a9)" onclick="setBg(1)"></button>
+<button class="palette" style="background:linear-gradient(135deg,#202c54,#6479b9)" onclick="setBg(2)"></button>
+<button class="palette" style="background:linear-gradient(135deg,#ed8b45,#e94e77)" onclick="setBg(3)"></button>
+<button class="palette" style="background:linear-gradient(135deg,#633b84,#c08ad8)" onclick="setBg(4)"></button>
+<button class="palette" style="background:linear-gradient(135deg,#176b48,#9cbd67)" onclick="setBg(5)"></button>
+</div>
+<p>Ё акси худро интихоб кунед:</p>
+<input type="file" id="photoInput" accept="image/*" onchange="uploadBg(event)">
+<button class="secondary" onclick="removePhoto()">Хориҷ кардани акси фон</button>
+</div>
+</section>
+
+<footer>WordDay · Learn something new every day</footer>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let words=JSON.parse(localStorage.getItem('wd_words')||'[]');
+let quizCount=Number(localStorage.getItem('wd_quizzes')||0);
+let learned=Number(localStorage.getItem('wd_learned')||0);
+let bg=Number(localStorage.getItem('wd_bg')||0);
+let photo=localStorage.getItem('wd_photo');
+
+const backgrounds=[
+'linear-gradient(135deg,#5148d8,#9b65d8,#e58bb8)',
+'linear-gradient(135deg,#087e8b,#55c6a9)',
+'linear-gradient(135deg,#202c54,#6479b9)',
+'linear-gradient(135deg,#ed8b45,#e94e77)',
+'linear-gradient(135deg,#633b84,#c08ad8)',
+'linear-gradient(135deg,#176b48,#9cbd67)'
+];
+
+function save(){
+localStorage.setItem('wd_words',JSON.stringify(words));
+localStorage.setItem('wd_quizzes',quizCount);
+localStorage.setItem('wd_learned',learned);
+render();
+}
+function show(page){
+document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));
+$(page).classList.remove('hidden');
+}
+function addWord(){
+let w=$('newWord').value.trim(),m=$('newMeaning').value.trim(),n=$('newNote').value.trim();
+if(!w||!m){alert('Калима ва тарҷумаро ворид кунед.');return;}
+words.unshift({w,m,n});
+$('newWord').value='';$('newMeaning').value='';$('newNote').value='';
+save();
+}
+function speak(word){
+if(!('speechSynthesis' in window)){alert('Талаффуз дар ин браузер дастгирӣ намешавад.');return;}
+let u=new SpeechSynthesisUtterance(word);
+let lang=$('learnLanguage').value;
+let codes={'English':'en-US','Тоҷикӣ':'tg-TJ','Русский':'ru-RU','العربية':'ar-SA','Deutsch':'de-DE','Français':'fr-FR','Español':'es-ES','中文':'zh-CN','日本語':'ja-JP','Türkçe':'tr-TR','Italiano':'it-IT','한국어':'ko-KR'};
+u.lang=codes[lang]||'en-US';
+speechSynthesis.speak(u);
+}
+function removeWord(i){words.splice(i,1);save();}
+function markLearned(){learned++;save();}
+function render(){
+$('total').textContent=words.length;
+$('learned').textContent=learned;
+$('quizzes').textContent=quizCount;
+$('languageInfo').textContent='Забони омӯзиш: '+$('learnLanguage').value+' · Шарҳ: '+$('baseLanguage').value;
+$('wordList').innerHTML=words.map((x,i)=>`
+<div class="word"><div><strong>${safe(x.w)}</strong><small>${safe(x.m)} ${x.n?'· '+safe(x.n):''}</small></div>
+<div><button onclick="speak(${JSON.stringify(x.w).replace(/"/g,'&quot;')})">🔊</button>
+<button onclick="markLearned()">✓</button>
+<button onclick="removeWord(${i})">✕</button></div></div>`).join('')||'<p>Ҳоло калима нест. Калимаи аввалро илова кунед!</p>';
+$('recent').innerHTML=words.slice(0,3).map(x=>`<div class="word"><div><strong>${safe(x.w)}</strong><small>${safe(x.m)}</small></div></div>`).join('')||'Аввалин калимаи худро илова кунед.';
+}
+function safe(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function startQuiz(){
+if(words.length<2){$('feedback').textContent='Барои санҷиш ҳадди ақал 2 калима илова кунед.';return;}
+let correct=words[Math.floor(Math.random()*words.length)];
+let choices=[correct,...words.filter(x=>x!==correct).sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5);
+$('question').textContent=correct.w;
+$('answers').innerHTML=choices.map(x=>`<button class="secondary" style="display:block;width:100%;margin:8px 0" onclick="answer(this,${x===correct})">${safe(x.m)}</button>`).join('');
+$('feedback').textContent='';
+window.currentCorrect=correct;
+}
+function answer(btn,ok){
+document.querySelectorAll('#answers button').forEach(b=>b.disabled=true);
+$('feedback').textContent=ok?'Офарин! Ҷавоби дуруст аст.':'Ин ҷавоби дуруст нест. Ҷавоби дуруст: '+window.currentCorrect.m;
+if(ok)learned++;
+quizCount++;save();
+}
+function setBg(i){
+bg=i;localStorage.setItem('wd_bg',i);
+localStorage.removeItem('wd_photo');photo=null;applyBg();
+}
+function applyBg(){
+document.body.classList.remove('photo');
+if(photo){document.body.style.backgroundImage=`url("${photo}")`;document.body.classList.add('photo');}
+else{document.body.style.backgroundImage=backgrounds[bg];}
+}
+function uploadBg(e){
+let file=e.target.files[0];if(!file)return;
+let reader=new FileReader();
+reader.onload=()=>{
+let img=new Image();
+img.onload=()=>{
+let canvas=document.createElement('canvas'),max=1200;
+let scale=Math.min(1,max/Math.max(img.width,img.height));
+canvas.width=img.width*scale;canvas.height=img.height*scale;
+canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+photo=canvas.toDataURL('image/jpeg',.75);
+try{localStorage.setItem('wd_photo',photo);applyBg();}
+catch(err){alert('Акси интихобшуда хеле калон аст. Акси дигарро санҷед.');}
+};
+img.src=reader.result;
+};
+reader.readAsDataURL(file);
+}
+function removePhoto(){
+photo=null;localStorage.removeItem('wd_photo');applyBg();
+}
+function saveSettings(){
+localStorage.setItem('wd_learn',$('learnLanguage').value);
+localStorage.setItem('wd_base',$('baseLanguage').value);
+render();
+}
+$('learnLanguage').value=localStorage.getItem('wd_learn')||'English';
+$('baseLanguage').value=localStorage.getItem('wd_base')||'Тоҷикӣ';
+photo=localStorage.getItem('wd_photo');
+applyBg();render();
+</script>
+</body>
+</html>
